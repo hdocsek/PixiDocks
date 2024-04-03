@@ -93,11 +93,6 @@ public class HostWindow : Window, IHostWindow
         _draggingWindow = true;
         _dragStartPoint = e.GetPosition(this) + pt;
         BeginMoveDrag(e);
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            EndDrag(e);
-        }
     }
 
     private void EndDrag(PointerEventArgs e)
