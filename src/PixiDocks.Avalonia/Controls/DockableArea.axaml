@@ -40,23 +40,23 @@
                         </Style>
                     </Border.Styles>
                     <Grid>
-                        <controls:DockingPicker IsVisible="False" Name="PART_DockingPicker" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        <controls:DockingPicker ZIndex="9999" IsVisible="False" Name="PART_DockingPicker" HorizontalAlignment="Center" VerticalAlignment="Center"
                                                 Dockables="{Binding Dockables, RelativeSource={RelativeSource TemplatedParent}}"/>
-                        <Grid ColumnDefinitions="*, *" RowDefinitions="*, *">
+                        <Grid ColumnDefinitions="*, *" RowDefinitions="*, *" ZIndex="9999">
                             <Border Classes="dockPreview" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Name="TopPreview"/>
                             <Border Classes="dockPreview" Grid.Row="0" Grid.Column="0" Name="LeftPreview" Grid.RowSpan="2"/>
                             <Border Classes="dockPreview" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Name="RightPreview"/>
                             <Border Classes="dockPreview" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Name="BottomPreview"/>
                             <Border Classes="dockPreview" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="2" Name="CenterPreview"/>
                         </Grid>
-                        <DockPanel>
+                        <Grid>
                             <TabControl Name="PART_TabControl" Theme="{DynamicResource PixiDockTabControlTheme}" Classes="draggable"
-                                SelectedItem="{Binding Path=ActiveDockable, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
-                                ItemsSource="{TemplateBinding Dockables}"
-                                TabStripPlacement="{TemplateBinding TabPlacement}">
+                                        SelectedItem="{Binding Path=ActiveDockable, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                        ItemsSource="{TemplateBinding Dockables}"
+                                        TabStripPlacement="{TemplateBinding TabPlacement}">
                                 <TabControl.ItemTemplate>
                                     <DataTemplate>
-                                        <controls:DockableAreaStripItem DockPanel.Dock="Top" Margin="5 0"
+                                        <controls:DockableAreaStripItem DockPanel.Dock="Top"
                                                                         Dockable="{Binding $parent[TabItem].Content}"/>
                                     </DataTemplate>
                                 </TabControl.ItemTemplate>
@@ -68,14 +68,16 @@
                                     </ResourceDictionary>
                                 </TabControl.Resources>
                             </TabControl>
-                        </DockPanel>
+                            <ContentPresenter Content="{Binding FallbackContent, RelativeSource={RelativeSource TemplatedParent}}"
+                                              IsVisible="{Binding !Dockables.Count, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Grid>
                     </Grid>
                 </Border>
             </ControlTemplate>
         </Setter>
 
         <Style Selector="^ /template/ Border.dockPreview">
-            <Setter Property="Background" Value="Red"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeDockPreviewBackgroundBrush}"/>
             <Setter Property="Opacity" Value="0.5"/>
             <Setter Property="IsVisible" Value="False"/>
         </Style>

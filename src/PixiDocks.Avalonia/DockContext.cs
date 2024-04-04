@@ -2,11 +2,9 @@ using System.Text.Json;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using PixiDocks.Avalonia.Controls;
-using PixiDocks.Core;
 using PixiDocks.Core.Docking;
 using PixiDocks.Core.Docking.Events;
 using PixiDocks.Core.Serialization;
@@ -15,12 +13,32 @@ namespace PixiDocks.Avalonia;
 
 public class DockContext : IDockContext
 {
+    private IDockableHost? _focusedHost;
     private List<IDockableHost> allHosts = new();
     private List<IDockableHostRegion> allRegions = new();
-
     private Dictionary<string, HostWindow> floatingWindows = new();
+
     public IReadOnlyCollection<IDockableHostRegion> AllRegions => allRegions;
     public IReadOnlyCollection<IDockableHost> AllHosts => allHosts;
+
+    public IDockableHost? FocusedHost
+    {
+        get => _focusedHost;
+        set
+        {
+            if (_focusedHost == value)
+            {
+                return;
+            }
+
+            _focusedHost = value;
+            FocusedHostChanged?.Invoke(_focusedHost);
+        }
+    }
+
+    public Func<HostWindow> HostWindowFactory { get; set; } = () => new HostWindow();
+
+    public event Action<IDockableHost?>? FocusedHostChanged;
 
     public void AddHost(IDockableHost host)
     {
@@ -67,6 +85,7 @@ public class DockContext : IDockContext
 
         return JsonSerializer.Serialize(layout);
     }
+
 
     public void RemoveRegion(IDockableHostRegion sender)
     {
@@ -117,7 +136,8 @@ public class DockContext : IDockContext
         };
 
         dockable.Host?.RemoveDockable(dockable);
-        var hostWindow = new HostWindow(dockable, this, pos);
+        var hostWindow = HostWindowFactory();
+        hostWindow.Initialize(dockable, this, pos);
         hostWindow.Closing += HostWindowOnClosing;
         hostWindow.Activated += OnWindowActivated;
         if (!floatingWindows.TryAdd(dockable.Id, hostWindow))
@@ -223,6 +243,7 @@ public class DockContext : IDockContext
 
         toHost.AddDockable(dockable);
         toHost.ActiveDockable = dockable;
+        FocusedHost = toHost;
     }
 
     private HostWindow? TryGetHostWindow(IDockableHost toHost)
